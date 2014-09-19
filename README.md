@@ -11,3 +11,5 @@ The script inserts a BEGIN marker and an END marker. This way updates (re-runnin
 
 The script will ask for sudo privileges in order to perform the modifications of /etc/hosts.
 /etc/hosts will be backed up to /tmp/ in case of total disaster and other problems.
+
+This script is distributed under the beerware license. Yay!
