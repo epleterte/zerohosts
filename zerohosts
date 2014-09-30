@@ -10,37 +10,93 @@
 # ----------------------------------------------------------------------------
 #
 
-
+## config
 remote_hosts_file="http://someonewhocares.org/hosts/hosts"
 hosts_file="/etc/hosts"
 zerohosts_tmp_file="/tmp/zerohosts.tmp"
 
-echo "Fetching remote file..."
+## flags
+quiet="false"
+
+# fancy terminal stuff 
+if [ -t 1 ]; then
+    exec 3>&2 2>/dev/null
+    b=$( tput bold ) || true
+    red=$( tput setf 4 ) || true
+    green=$( tput setf 2 ) || true
+    yellow=$( tput setf 6 ) || true
+    t_reset=$( tput sgr0 ) || true
+    exec 2>&3; exec 3>&-
+fi
+
+## functions
+function print_usage {
+  cat <<EOF
+Safely append zerohosts to /etc/hosts
+This script will prompt for a sudo password.
+
+Usage: ${0} [-hq]
+  -h    This helpful text
+  -q    Quiet - only print errors.
+
+Examples:
+  ${0}
+  # run from cron - requires root privilegies / passwordless sudo
+  ${0} -q  
+EOF
+}
+
+function p_err {
+    # print errors
+    # params: <string>
+    local string="${@}"
+    printf "${b:-}${red:-}>>${t_reset:-} %s\n" "${string}"
+}
+
+function p_info {
+    # print info
+    # params: <string>
+    local string="${@}"
+    [[ "${quiet}" == "false" ]] && printf "${b:-}${yellow:-}>>${t_reset:-} %s\n" "${string}"
+}
+
+while getopts hq o
+do
+  case $o in
+    h)
+      print_usage ; exit ;;
+    q)
+      quiet="true" ;;
+  esac
+done
+shift $(($OPTIND-1))
+
+p_info "Fetching remote file..."
 curl -s "${remote_hosts_file}" > "${zerohosts_tmp_file}"
 
-echo "Backing up existing hosts file to /tmp/ if needed."
-echo "You should verify the results after having run this script."
+p_info "Backing up existing hosts file to /tmp/ if needed."
+p_info "You should verify the results after having run this script."
 cp /etc/hosts /tmp/hosts.$( date "+%s" )
 
 if ( egrep -q "^### ZEROHOSTS BEGIN ###$" "${hosts_file}" )
 then
-  echo "ZERODATA BEGIN marker found."
+  #p_info "ZERODATA BEGIN marker found."
   if ( ! egrep -q "^### ZEROHOSTS END ###$" "${hosts_file}" )
   then
-    echo "You have a 'ZEROHOSTS BEGIN' marker in your hosts file, but no 'ZEROHOSTS END' marker - bogus, man! Please fix to continue."
+    p_err "You have a 'ZEROHOSTS BEGIN' marker in your hosts file, but no 'ZEROHOSTS END' marker - bogus, man! Please fix to continue."
     exit 1
   fi
-  echo "Deleting old ZEROHOSTS entries. Hope you didn't manually change them."
-  echo "Need elevated privileges to do this - may prompt for sudo password"
+  p_info "Deleting old ZEROHOSTS entries. Hope you didn't manually change them."
+  p_info "Need elevated privileges to do this - may prompt for sudo password"
   sudo sed -i '/^### ZEROHOSTS BEGIN ###$/,/^### ZEROHOSTS END ###$/ d' "${hosts_file}"
-  echo "OK, hopefully I removed the old ones..."
+  p_info "OK, hopefully I removed the old ones..."
 fi
-echo "Inserting new ones!"
+p_info "Inserting new ones!"
 
 echo "### ZEROHOSTS BEGIN ###" | sudo tee -a "${hosts_file}" >/dev/null
 cat "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
 echo "### ZEROHOSTS END ###" | sudo tee -a "${hosts_file}" >/dev/null
 
-echo "Cleaning out downloaded hostsfile..."
+p_info "Cleaning out downloaded hostsfile..."
 rm "${zerohosts_tmp_file}"
-echo "Allright. I hope this went well. Happy surfing!"
+p_info "Allright. I hope this went well. Happy surfing!"
