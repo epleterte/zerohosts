@@ -35,7 +35,7 @@ then
   sudo sed -i '/^### ZEROHOSTS BEGIN ###$/,/^### ZEROHOSTS END ###$/ d' "${hosts_file}"
   echo "OK, hopefully I removed the old ones..."
 fi
-echo "Insterting new ones!"
+echo "Inserting new ones!"
 
 echo "### ZEROHOSTS BEGIN ###" | sudo tee -a "${hosts_file}" >/dev/null
 cat "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
