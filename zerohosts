@@ -35,8 +35,9 @@ function print_usage {
 Safely append zerohosts to /etc/hosts
 This script will prompt for a sudo password.
 
-Usage: ${0} [-hq]
+Usage: ${0} [-hdq]
   -h    This helpful text
+  -d    Delete entries previosly added.
   -q    Quiet - only print errors.
 
 Examples:
@@ -60,11 +61,29 @@ function p_info {
     [[ "${quiet}" == "false" ]] && printf "${b:-}${yellow:-}>>${t_reset:-} %s\n" "${string}"
 }
 
-while getopts hq o
+function delete_entries_found {
+  if ( egrep -q "^### ZEROHOSTS BEGIN ###$" "${hosts_file}" )
+  then
+    #p_info "ZERODATA BEGIN marker found."
+    if ( ! egrep -q "^### ZEROHOSTS END ###$" "${hosts_file}" )
+    then
+      p_err "You have a 'ZEROHOSTS BEGIN' marker in your hosts file, but no 'ZEROHOSTS END' marker - bogus, man! Please fix to continue."
+      exit 1
+    fi
+    p_info "Deleting old ZEROHOSTS entries. Hope you didn't manually change them."
+    p_info "...need elevated privileges to do this - may prompt for sudo password"
+    sudo sed -i '/^### ZEROHOSTS BEGIN ###$/,/^### ZEROHOSTS END ###$/ d' "${hosts_file}"
+    p_info "OK, hopefully I removed the old ones..."
+  fi
+}
+
+while getopts hdq o
 do
   case $o in
     h)
       print_usage ; exit ;;
+    d)
+      delete_entries_found ; exit ;;
     q)
       quiet="true" ;;
   esac
@@ -80,19 +99,8 @@ p_info "Backing up existing hosts file to /tmp/"
 p_info "You should verify the results after having run this script."
 cp /etc/hosts /tmp/hosts.$( date "+%s" )
 
-if ( egrep -q "^### ZEROHOSTS BEGIN ###$" "${hosts_file}" )
-then
-  #p_info "ZERODATA BEGIN marker found."
-  if ( ! egrep -q "^### ZEROHOSTS END ###$" "${hosts_file}" )
-  then
-    p_err "You have a 'ZEROHOSTS BEGIN' marker in your hosts file, but no 'ZEROHOSTS END' marker - bogus, man! Please fix to continue."
-    exit 1
-  fi
-  p_info "Deleting old ZEROHOSTS entries. Hope you didn't manually change them."
-  p_info "Need elevated privileges to do this - may prompt for sudo password"
-  sudo sed -i '/^### ZEROHOSTS BEGIN ###$/,/^### ZEROHOSTS END ###$/ d' "${hosts_file}"
-  p_info "OK, hopefully I removed the old ones..."
-fi
+delete_entries_found
+
 p_info "Adding new entries!"
 
 echo "### ZEROHOSTS BEGIN ###" | sudo tee -a "${hosts_file}" >/dev/null
