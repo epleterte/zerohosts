@@ -74,7 +74,7 @@ shift $(($OPTIND-1))
 p_info "Fetching remote file..."
 curl -s "${remote_hosts_file}" > "${zerohosts_tmp_file}"
 
-p_info "Backing up existing hosts file to /tmp/ if needed."
+p_info "Backing up existing hosts file to /tmp/"
 p_info "You should verify the results after having run this script."
 cp /etc/hosts /tmp/hosts.$( date "+%s" )
 
@@ -91,12 +91,12 @@ then
   sudo sed -i '/^### ZEROHOSTS BEGIN ###$/,/^### ZEROHOSTS END ###$/ d' "${hosts_file}"
   p_info "OK, hopefully I removed the old ones..."
 fi
-p_info "Inserting new ones!"
+p_info "Adding new entries!"
 
 echo "### ZEROHOSTS BEGIN ###" | sudo tee -a "${hosts_file}" >/dev/null
 cat "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
 echo "### ZEROHOSTS END ###" | sudo tee -a "${hosts_file}" >/dev/null
 
-p_info "Cleaning out downloaded hostsfile..."
+#p_info "Cleaning out downloaded hostsfile..."
 rm "${zerohosts_tmp_file}"
 p_info "Allright. I hope this went well. Happy surfing!"
