@@ -13,7 +13,7 @@
 ## config
 remote_hosts_file="http://someonewhocares.org/hosts/hosts"
 hosts_file="/etc/hosts"
-zerohosts_tmp_file="/tmp/zerohosts.tmp"
+zerohosts_tmp_file="$(mktemp)"
 
 ## flags
 quiet="false"
@@ -71,6 +71,8 @@ do
 done
 shift $(($OPTIND-1))
 
+trap 'rm "${zerohosts_tmp_file}"' EXIT
+
 p_info "Fetching remote file..."
 curl -s "${remote_hosts_file}" > "${zerohosts_tmp_file}"
 
@@ -97,6 +99,4 @@ echo "### ZEROHOSTS BEGIN ###" | sudo tee -a "${hosts_file}" >/dev/null
 cat "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
 echo "### ZEROHOSTS END ###" | sudo tee -a "${hosts_file}" >/dev/null
 
-#p_info "Cleaning out downloaded hostsfile..."
-rm "${zerohosts_tmp_file}"
 p_info "Allright. I hope this went well. Happy surfing!"
