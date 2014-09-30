@@ -1,6 +1,8 @@
 #!/bin/bash -ue
 # Christian Bryn <chr.bryn@gmail.com> 2014
 # by courtesy of http://someonewhocares.org/hosts/zero/
+# fetches remote zerohosts file and safely appends to /etc/hosts
+# requires sudo privileges for some actions
 #
 # ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
