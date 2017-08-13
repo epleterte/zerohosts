@@ -14,11 +14,13 @@
 
 ## config
 remote_hosts_file="http://someonewhocares.org/hosts/hosts"
+remote_host_zero_file="http://someonewhocares.org/hosts/zero/"
 hosts_file="/etc/hosts"
 zerohosts_tmp_file="$(mktemp)"
 
 ## flags
 quiet="false"
+route_method="local"
 
 # fancy terminal stuff
 if [ -t 1 ]; then
@@ -41,9 +43,11 @@ Usage: ${0} [-hdq]
   -h    This helpful text
   -d    Delete entries previosly added.
   -q    Quiet - only print errors.
+  -z    Route to 0.0.0.0 (default: 127.0.0.1)
 
 Examples:
   ${0}
+  ${0} -z
   # run from cron - requires root privilegies / passwordless sudo
   ${0} -q
 EOF
@@ -79,7 +83,7 @@ function delete_entries_found {
   fi
 }
 
-while getopts hdq o
+while getopts hdqz o
 do
   case $o in
     h)
@@ -88,6 +92,8 @@ do
       delete_entries_found ; exit ;;
     q)
       quiet="true" ;;
+    z)
+      route_method="zero" ;;
   esac
 done
 shift $(($OPTIND-1))
@@ -95,7 +101,12 @@ shift $(($OPTIND-1))
 trap 'rm "${zerohosts_tmp_file}"' EXIT
 
 p_info "Fetching remote file..."
-curl -s "${remote_hosts_file}" > "${zerohosts_tmp_file}"
+case $route_method in
+  "hosts")
+    curl -s "${remote_hosts_file}" > "${zerohosts_tmp_file}" ;;
+  "zero")
+    curl -s "${remote_hosts_zero_file}" > "${zerohosts_tmp_file}" ;;
+esac
 
 p_info "Backing up existing hosts file to /tmp/"
 p_info "You should verify the results after having run this script."
