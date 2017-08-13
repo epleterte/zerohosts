@@ -20,7 +20,7 @@ zerohosts_tmp_file="$(mktemp)"
 ## flags
 quiet="false"
 
-# fancy terminal stuff 
+# fancy terminal stuff
 if [ -t 1 ]; then
     exec 3>&2 2>/dev/null
     b=$( tput bold ) || true
@@ -45,7 +45,7 @@ Usage: ${0} [-hdq]
 Examples:
   ${0}
   # run from cron - requires root privilegies / passwordless sudo
-  ${0} -q  
+  ${0} -q
 EOF
 }
 
