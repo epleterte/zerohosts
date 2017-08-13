@@ -21,6 +21,7 @@ zerohosts_tmp_file="$(mktemp)"
 ## flags
 quiet="false"
 route_method="local"
+update="false"
 
 # fancy terminal stuff
 if [ -t 1 ]; then
@@ -88,15 +89,21 @@ do
   case $o in
     h)
       print_usage ; exit ;;
+    a)
+      update="true" ;;
     d)
       delete_entries_found ; exit ;;
     q)
+      update="true"
       quiet="true" ;;
     z)
+      update="true"
       route_method="zero" ;;
   esac
 done
 shift $(($OPTIND-1))
+
+[[ "${update}" != "true" ]] && { echo "No update/delete action specified!"; print_usage; exit; }
 
 trap 'rm "${zerohosts_tmp_file}"' EXIT
 
