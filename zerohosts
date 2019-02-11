@@ -43,6 +43,7 @@ This script will prompt for a sudo password.
 
 Usage: ${0} [-hdq]
   -h    This helpful text
+  -a    Add/update entries
   -d    Delete entries previosly added.
   -q    Quiet - only print errors.
   -z    Route to 0.0.0.0 (default: 127.0.0.1)
@@ -85,7 +86,7 @@ function delete_entries_found {
   fi
 }
 
-while getopts hdqz o
+while getopts ahdqz o
 do
   case $o in
     h)
