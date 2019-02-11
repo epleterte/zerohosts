@@ -111,10 +111,10 @@ trap 'rm "${zerohosts_tmp_file}"' EXIT
 
 p_info "Fetching remote file..."
 case $route_method in
-  "hosts")
-    curl -s "${remote_hosts_file}" > "${zerohosts_tmp_file}" ;;
+  "local")
+    curl -s -L "${remote_hosts_file}" > "${zerohosts_tmp_file}" ;;
   "zero")
-    curl -s "${remote_hosts_zero_file}" > "${zerohosts_tmp_file}" ;;
+    curl -s -L "${remote_hosts_zero_file}" > "${zerohosts_tmp_file}" ;;
 esac
 
 p_info "Backing up existing hosts file to /tmp/"
