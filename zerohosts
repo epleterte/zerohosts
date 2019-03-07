@@ -15,7 +15,7 @@
 
 ## config
 remote_hosts_file="http://someonewhocares.org/hosts/hosts"
-remote_hosts_zero_file="http://someonewhocares.org/hosts/zero/"
+remote_hosts_zero_file="https://someonewhocares.org/hosts/zero/hosts"
 hosts_file="/etc/hosts"
 zerohosts_tmp_file="$(mktemp)"
 
