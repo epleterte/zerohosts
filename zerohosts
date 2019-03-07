@@ -1,5 +1,5 @@
 #!/bin/bash -ue
-# Christian Bryn <chr.bryn@gmail.com> 2014-2017
+# Christian Bryn <chr.bryn@gmail.com> 2014-2019
 # by courtesy of http://someonewhocares.org/hosts/zero/
 # fetches remote zerohosts file and safely appends to /etc/hosts
 # requires sudo privileges for some actions
