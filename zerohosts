@@ -127,6 +127,6 @@ p_info "Adding new entries!"
 
 echo "### ZEROHOSTS BEGIN ###" | sudo tee -a "${hosts_file}" >/dev/null
 cat "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
-echo "### ZEROHOSTS END ###" | sudo tee -a "${hosts_file}" >/dev/null
+echo -en "\n### ZEROHOSTS END ###\n" | sudo tee -a "${hosts_file}" >/dev/null
 
 p_info "Allright. I hope this went well. Happy surfing!"
