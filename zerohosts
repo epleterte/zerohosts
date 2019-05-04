@@ -23,6 +23,7 @@ zerohosts_tmp_file="$(mktemp)"
 quiet="false"
 route_method="local"
 update="false"
+lookup_method="hosts"
 
 # fancy terminal stuff
 if [ -t 1 ]; then
@@ -86,7 +87,7 @@ function delete_entries_found {
   fi
 }
 
-while getopts ahdqz o
+while getopts ahdDqz o
 do
   case $o in
     h)
@@ -95,6 +96,9 @@ do
       update="true" ;;
     d)
       delete_entries_found ; exit ;;
+    D)
+      lookup_method="dnsmasqd"
+      hosts_file="/etc/dnsmasq.d/zerohosts" ;;
     q)
       update="true"
       quiet="true" ;;
@@ -117,16 +121,28 @@ case $route_method in
     curl -s -L "${remote_hosts_zero_file}" > "${zerohosts_tmp_file}" ;;
 esac
 
-p_info "Backing up existing hosts file to /tmp/"
-p_info "You should verify the results after having run this script."
-cp /etc/hosts /tmp/hosts.$( date "+%s" )
+case "${lookup_method}" in
+  "hosts")
+    p_info "Backing up existing hosts file to /tmp/"
+    p_info "You should verify the results after having run this script."
+    cp /etc/hosts /tmp/hosts.$( date "+%s" )
+esac
 
 delete_entries_found
 
 p_info "Adding new entries!"
 
 echo "### ZEROHOSTS BEGIN ###" | sudo tee -a "${hosts_file}" >/dev/null
-cat "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
+
+case "${lookup_method}" in
+  "hosts")
+    cat "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null 
+    ;;
+  "dnsmasqd")
+    awk '!/^#|^$/ { print "address=/"$2"/"$1 ; next } { print $0 }' "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
+esac
+
+
 echo -en "\n### ZEROHOSTS END ###\n" | sudo tee -a "${hosts_file}" >/dev/null
 
 p_info "Allright. I hope this went well. Happy surfing!"
