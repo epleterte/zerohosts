@@ -123,8 +123,7 @@ esac
 
 case "${lookup_method}" in
   "hosts")
-    p_info "Backing up existing hosts file to /tmp/"
-    p_info "You should verify the results after having run this script."
+    p_info "Backing up /etc/hosts to /tmp/"
     cp /etc/hosts /tmp/hosts.$( date "+%s" )
 esac
 
@@ -142,7 +141,4 @@ case "${lookup_method}" in
     awk '!/^#|^$/ { print "address=/"$2"/"$1 ; next } { print $0 }' "${zerohosts_tmp_file}" | sudo tee -a "${hosts_file}" >/dev/null
 esac
 
-
 echo -en "\n### ZEROHOSTS END ###\n" | sudo tee -a "${hosts_file}" >/dev/null
-
-p_info "Allright. I hope this went well. Happy surfing!"
